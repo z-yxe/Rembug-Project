@@ -1,0 +1,8 @@
+/vendor
+/node_modules
+/storage/*.key
+.env
+.phpunit.result.cache
+/public/storage
+/storage/app/public/*
+!.gitignore
