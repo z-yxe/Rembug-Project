@@ -1,43 +1,52 @@
-FROM php:8.2-cli
+# Base image PHP + Apache
+FROM php:8.2-apache
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     unzip \
-    libzip-dev \
-    zip \
     git \
     curl \
+    libzip-dev \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libssl-dev \
     pkg-config \
+    libssl-dev \
     libcurl4-openssl-dev \
+    libicu-dev \
+    zlib1g-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
 # Install MongoDB extension
 RUN pecl install mongodb \
     && docker-php-ext-enable mongodb
 
+# Enable Apache rewrite module
+RUN a2enmod rewrite
+
+# Copy existing application directory contents
+COPY . /var/www/html
+
+# Set working directory
+WORKDIR /var/www/html
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /app
-
-# Copy files
-COPY . /app
-
 # Install Laravel dependencies
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan key:generate \
+RUN composer install --no-dev --optimize-autoloader
+
+# Laravel Artisan setup
+RUN php artisan key:generate \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache \
     && php artisan storage:link
 
-# Expose port 8000
-EXPOSE 8000
+# Set permissions (opsional, jika file permission error)
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Start Laravel app
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Expose port
+EXPOSE 80
