@@ -38,6 +38,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Copy dummy env file for build
+RUN cp .env.example .env
+
 # Laravel Artisan setup
 RUN php artisan key:generate \
     && php artisan config:cache \
@@ -45,7 +48,7 @@ RUN php artisan key:generate \
     && php artisan view:cache \
     && php artisan storage:link
 
-# Set permissions (opsional, jika file permission error)
+# Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose port
