@@ -125,15 +125,13 @@
                 @endif
             </div>
             @endif
+        </div>
+        
+        <hr>
 
+        <div class="post-comment">
             <!-- Comments Preview -->
             @if ($post->comments->count() > 0)
-                @if ($post->comments->count() > 2)
-                <a href="{{ route('posts.show', $post->id) }}#comments" class="view-all-comments">
-                    View all {{ $post->comments->count() }} comments
-                </a>
-                @endif
-                
                 <div class="comments-preview">
                     @foreach($post->comments->take(2) as $comment)
                     <div class="comment">
@@ -142,6 +140,12 @@
                     </div>
                     @endforeach
                 </div>
+
+                @if ($post->comments->count() > 2)
+                <a href="{{ route('posts.show', $post->id) }}#comments" class="view-all-comments">
+                    View all {{ $post->comments->count() }} comments
+                </a>
+                @endif
             @endif
 
             <!-- Add Comment Form -->
@@ -149,7 +153,9 @@
                 @csrf
                 <div class="comment-input-wrapper">
                     <input type="text" name="comment" placeholder="Add a comment..." required>
-                    <button type="submit" class="comment-submit">Post</button>
+                    <button type="submit" class="comment-submit">
+                        <i class="fa-solid fa-arrow-right" style="font-size: 1rem;"></i>
+                    </button>
                 </div>
             </form>
         </div>
@@ -186,8 +192,6 @@
 
 <style>
 :root {
-    --primary-500: #6366F1;
-    --primary-600: #4F46E5;
     --gray-50: #F9FAFB;
     --gray-100: #F3F4F6;
     --gray-200: #E5E7EB;
@@ -209,6 +213,10 @@
     --radius-xl: 1rem;
 }
 
+hr {
+    color: var(--gray-400);
+}
+
 .posts-container {
     max-width: 600px;
     margin: 0 auto;
@@ -224,11 +232,6 @@
     border: 1px solid var(--gray-200);
     overflow: hidden;
     transition: all 0.2s ease;
-}
-
-.post-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
 }
 
 /* Post Header */
@@ -306,7 +309,7 @@
 /* Post Image */
 .post-image {
     position: relative;
-    aspect-ratio: 1;
+    aspect-ratio: 1/1;
     overflow: hidden;
 }
 
@@ -317,13 +320,13 @@
     transition: transform 0.3s ease;
 }
 
-.post-image:hover img {
-    transform: scale(1.02);
-}
-
 /* Post Content */
 .post-content {
-    padding: 16px 20px 20px;
+    padding: 16px 20px 0px;
+}
+
+.post-comment {
+    padding: 0px 20px 20px;
 }
 
 .post-interactions {
@@ -369,7 +372,6 @@
 }
 
 .interaction-btn:hover {
-    background: var(--gray-100);
     transform: scale(1.1);
 }
 
@@ -377,22 +379,11 @@
     color: var(--red-500);
 }
 
-.interaction-btn.liked:hover {
-    background: rgba(239, 68, 68, 0.1);
-}
-
 .caption {
     font-size: 14px;
     line-height: 1.5;
     color: var(--gray-700);
     margin-bottom: 8px;
-}
-
-.caption-username {
-    font-weight: 600;
-    color: var(--gray-900);
-    text-decoration: none;
-    margin-right: 8px;
 }
 
 .caption-text {
@@ -459,7 +450,7 @@
 }
 
 .comment-input-wrapper:focus-within {
-    border-color: var(--primary-500);
+    border-color: var(--primary-color);
     background: white;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
@@ -478,20 +469,16 @@
 }
 
 .comment-submit {
-    background: var(--primary-500);
+    background: var(--primary-color);
+    padding: 2px 12px;
     color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: var(--radius-md);
-    font-size: 14px;
-    font-weight: 600;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .comment-submit:hover {
-    background: var(--primary-600);
-    transform: translateY(-1px);
+    background: #0056b3;
 }
 
 /* Empty State */
@@ -639,10 +626,6 @@
     
     .post-header {
         padding: 12px 16px;
-    }
-    
-    .post-content {
-        padding: 12px 16px 16px;
     }
     
     .empty-state {
