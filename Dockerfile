@@ -51,7 +51,6 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Laravel Artisan setup
 RUN php artisan key:generate \
-    && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache \
     && php artisan storage:link
