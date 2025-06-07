@@ -10,7 +10,10 @@ use App\Http\Controllers\FollowController;
 
 // Home route
 Route::get('/', [PostController::class, 'index'])->middleware('auth')->name('home');
-Route::get('/home', function () {return redirect('/');})->name('home');
+Route::get('/home', function () {
+    return redirect('/');
+})->name('redirect.home');
+
 Auth::routes();
 
 // Post routes
