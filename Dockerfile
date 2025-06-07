@@ -26,7 +26,15 @@ RUN pecl install mongodb \
 # Enable Apache rewrite module
 RUN a2enmod rewrite
 
-# Copy existing application directory contents
+# Set Apache to serve Laravel from public folder
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/sites-available/*.conf \
+    /etc/apache2/apache2.conf \
+    /etc/apache2/conf-available/*.conf
+
+# Copy app source code
 COPY . /var/www/html
 
 # Set working directory
@@ -35,11 +43,11 @@ WORKDIR /var/www/html
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copy dummy .env for build-time (make sure .env.example exists)
+COPY .env.example .env
+
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
-
-# Copy dummy env file for build
-RUN cp .env.example .env
 
 # Laravel Artisan setup
 RUN php artisan key:generate \
