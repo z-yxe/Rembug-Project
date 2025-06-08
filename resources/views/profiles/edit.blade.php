@@ -4,18 +4,18 @@
 <div class="container-fluid px-0">
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-9">
-            <div class="mb-4" style="position: relative;">
+            <div class="header mb-3 mt-2" style="position: relative;">
                 <a href="{{ route('profile.show', $user->id) }}" class="btn btn-light btn-sm d-flex align-items-center" style="position: absolute; top: 50%; left: 0; transform: translateY(-50%); border-radius: 50px; padding: 0.5rem 1rem; z-index: 1;">
                     <i class="fas fa-arrow-left me-2"></i>
                     Back to Profile
                 </a>
-                <div class="text-center">
-                    <h2 class="mb-0" style="font-weight: 700; color: var(--text-primary);">Edit Profile</h2>
+                <div class="text-end">
+                    <h2 class="mb-0" style="font-weight: 600; font-size: 20px; color: var(--text-primary);"><i class="fas fa-edit me-1 me-md-3"></i>Edit Profile</h2>
                 </div>
             </div>
 
             <!-- Profile Edit Form -->
-            <div class="card border-0 shadow-sm" style="border-radius: var(--border-radius); background: var(--card-background);">
+            <div class="card border-1 shadow-sm" style="border: 1px solid var(--border-color); border-radius: var(--border-radius); background: var(--card-background);">
                 <div class="card-body p-4">
                     <form method="POST" action="{{ route('profile.update', $user->id) }}" enctype="multipart/form-data">
                         @csrf
@@ -131,6 +131,9 @@
 </script>
 
 <style>
+    .text-end {
+        margin-right: 18px;
+    }
     .form-control:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
@@ -159,6 +162,27 @@
     .btn,
     .form-control {
         transition: all 0.2s ease;
+    }
+
+    @media (max-width: 991.98px) {
+        .header {
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
+        }
+        .card {
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .header {
+            margin: 0
+        }
+        .card {
+            border-radius: 0 !important;
+            margin: 0;
+        }
     }
 </style>
 @endsection

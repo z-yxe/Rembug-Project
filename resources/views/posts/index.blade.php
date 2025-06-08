@@ -6,7 +6,6 @@
     @forelse($posts as $post)
     <article class="post-card">
         
-        <!-- Post Header -->
         <header class="post-header">
             @if($post->user)
                 <a href="{{ route('profile.show', $post->user->id) }}" class="text-decoration-none d-flex align-items-center enhanced-user-link">
@@ -64,17 +63,14 @@
             @endif
         </header>
 
-        <!-- Post Image -->
         <div class="post-image">
             <a href="{{ route('posts.show', $post->id) }}">
                 <img src="{{ asset('storage/' . $post->image_path) }}" alt="Post by {{ $post->user->username ?? 'user' }}" loading="lazy">
             </a>
         </div>
 
-        <!-- Post Content -->
         <div class="post-content">
             
-            <!-- Action Buttons -->
             <div class="post-interactions">
                 <div class="interaction-buttons">
                     <div class="interaction-group">
@@ -116,24 +112,20 @@
                 </div>
             </div>
 
-            <!-- Caption -->
             @if($post->caption)
             <div class="caption">
-                <span class="caption-text">{{ Str::limit($post->caption, 200) }}</span>
-                @if(strlen($post->caption) > 200)
+                <span class="caption-text">{{ Str::limit($post->caption, 100) }}</span>
+                @if(strlen($post->caption) > 100)
                 <a href="{{ route('posts.show', $post->id) }}" class="show-more">more</a>
                 @endif
             </div>
             @endif
         </div>
-        
-        <hr>
 
         <div class="post-comment">
-            <!-- Comments Preview -->
             @if ($post->comments->count() > 0)
                 <div class="comments-preview">
-                    @foreach($post->comments->take(2) as $comment)
+                    @foreach($post->comments->take(1) as $comment)
                     <div class="comment">
                         <a href="{{ $comment->user ? route('profile.show', $comment->user->id) : '#' }}" class="comment-username">{{ $comment->user ? $comment->user->username : 'Deleted User' }}</a>
                         <span class="comment-text">{{ Str::limit($comment->comment, 80) }}</span>
@@ -141,19 +133,18 @@
                     @endforeach
                 </div>
 
-                @if ($post->comments->count() > 2)
+                @if ($post->comments->count() > 1)
                 <a href="{{ route('posts.show', $post->id) }}#comments" class="view-all-comments">
                     View all {{ $post->comments->count() }} comments
                 </a>
                 @endif
             @endif
 
-            <!-- Add Comment Form -->
-            <form action="{{ route('comments.store', $post->id) }}" method="POST" class="comment-form">
+            <form action="{{ route('comments.store', $post->id) }}" method="POST">
                 @csrf
-                <div class="comment-input-wrapper">
-                    <input type="text" name="comment" placeholder="Add a comment..." required>
-                    <button type="submit" class="comment-submit">
+                <div class="input-group">
+                    <input type="text" name="comment" class="form-control" placeholder="Add a comment..." required style="border-radius: 16px 0 0 16px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-primary); font-size: 0.85rem; padding: 0.5rem 0.75rem; box-shadow: none;">
+                    <button class="btn" type="submit" style="border-radius: 0 16px 16px 0; background-color: var(--primary-color); color: white; font-weight: 500; font-size: 0.85rem; border: 1px solid var(--primary-color); padding: 0.5rem 1rem;">
                         <i class="fa-solid fa-arrow-right" style="font-size: 1rem;"></i>
                     </button>
                 </div>
@@ -162,7 +153,6 @@
     </article>
 
     @empty
-    <!-- Empty State -->
     <div class="empty-state">
         <div class="empty-icon">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -211,10 +201,6 @@
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
-}
-
-hr {
-    color: var(--gray-400);
 }
 
 .posts-container {
@@ -322,11 +308,12 @@ hr {
 
 /* Post Content */
 .post-content {
-    padding: 16px 20px 0px;
+    padding: 16px 20px 6px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .post-comment {
-    padding: 0px 20px 20px;
+    padding: 10px 20px 20px;
 }
 
 .post-interactions {
@@ -405,7 +392,7 @@ hr {
     font-size: 14px;
     color: var(--gray-500);
     text-decoration: none;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
     display: block;
 }
 
@@ -415,6 +402,10 @@ hr {
 
 .comments-preview {
     margin-bottom: 12px;
+}
+
+.input-group {
+    margin-top: 10px;
 }
 
 .comment {
@@ -609,19 +600,26 @@ hr {
     color: var(--red-600);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 991px) {
     .posts-container {
-        max-width: 100%;
-        padding: 0 12px;
-        gap: 16px;
+        margin-top: 15px;
+        gap: 15px; /* Mengurangi jarak antar kartu */
     }
 }
 
+/* --- PERUBAHAN UNTUK MOBILE --- */
 @media (max-width: 576px) {
     .posts-container {
-        padding: 0 12px;
-        gap: 16px;
+        margin-top: 5px;
+        padding: 0; /* Menghilangkan padding agar lebar penuh */
+        gap: 15px; /* Mengurangi jarak antar kartu */
+    }
+
+    .post-card {
+        border-radius: 0; /* Menghilangkan radius sudut kartu */
+        border-left: none; /* Menghilangkan border kiri */
+        border-right: none; /* Menghilangkan border kanan */
+        box-shadow: none; /* Menghilangkan shadow jika ada */
     }
     
     .post-header {
@@ -629,6 +627,9 @@ hr {
     }
     
     .empty-state {
+        border-radius: 0; /* Menyesuaikan empty state juga */
+        border-left: none;
+        border-right: none;
         padding: 48px 24px;
     }
     

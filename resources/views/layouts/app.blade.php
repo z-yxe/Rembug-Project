@@ -68,7 +68,7 @@
         }
         .navbar-toggler {
             border: none;
-            padding: 0.25rem 0.75rem;
+            padding: 0.25rem 0rem;
         }
         .navbar-toggler:focus {
             box-shadow: none;
@@ -282,9 +282,7 @@
         /* Responsive breakpoints */
         @media (max-width: 991.98px) {
             .main-content {
-                padding: 1.5rem 1rem 80px 1rem;
-                height: calc(100vh - var(--navbar-height));
-                overflow-y: auto;
+                padding: 10px 0 80px 0;
             }
             
             .main-content-area {

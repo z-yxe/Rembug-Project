@@ -1,612 +1,267 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="search-container">
-    <div class="search-header mb-4">
-        <div class="search-card">
-            <div class="search-card-body">
-                <h3 class="search-title mb-3">
-                    <i class="fas fa-search me-2"></i>
-                    Pencarian
-                </h3>
-                <form action="{{ route('search.index') }}" method="GET" class="search-form">
-                    <div class="search-input-wrapper">
-                        <input type="text" name="q" class="search-input" placeholder="Cari postingan, pengguna..." value="{{ $query ?? old('q') }}" aria-label="Search query">
-                        <button class="search-btn" type="submit">
-                            <i class="fas fa-search"></i>
-                            <span class="btn-text">Cari</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+<div class="container-lg py-4"> {{-- DIUBAH: .container -> .container-lg untuk max-width: 960px --}}
+    {{-- Form pencarian --}}
+    <form action="{{ route('search.index') }}" method="GET" class="search-form mb-5">
+        {{-- DIUBAH: Menerapkan kelas Bootstrap untuk layout dan tampilan --}}
+        <div class="d-flex border rounded-4 overflow-hidden search-input-wrapper">
+            <input type="text" name="q" class="form-control flex-grow-1 border-0 bg-transparent shadow-none search-input" placeholder="Cari postingan, pengguna..." value="{{ $query ?? old('q') }}" aria-label="Search query">
+            <button class="btn btn-primary d-flex align-items-center gap-2 rounded-start-0 search-btn" type="submit">
+                <i class="fas fa-search"></i>
+                <span class="btn-text">Cari</span>
+            </button>
         </div>
-    </div>
+    </form>
 
-    <!-- Search Results -->
+    {{-- Blok utama untuk menampilkan hasil atau pesan --}}
     @if(isset($query) && $query)
-    @if(isset($userResults) && $userResults->count() > 0)
-    <div class="results-section mb-5">
-        <div class="section-header">
-            <h4 class="section-title">
-                <i class="fas fa-users me-2"></i>
-                Pengguna Ditemukan
+    
+        {{-- Hasil Pengguna --}}
+        @if($userResults->isNotEmpty())
+        <div class="results-section">
+            <h4 class="section-title text-primary border-bottom pb-3 mb-3 fw-semibold"> {{-- DIUBAH: Menambahkan .fw-semibold --}}
+                <i class="fas fa-users me-3"></i>Pengguna Ditemukan
             </h4>
-            <div class="section-divider"></div>
-        </div>
-
-        <div class="users-grid">
-            @foreach($userResults as $user)
-            <div class="user-result-card">
-                <a href="{{ route('profile.show', $user->id) }}" class="user-result-link">
-                    <div class="user-result-avatar">
-                        <img src="{{ $user->profile_image ? asset('storage/' . $user->profile_image) : 'https://via.placeholder.com/56' }}"
-                            alt="{{ $user->username }}">
-                    </div>
-                    <div class="user-result-info">
-                        <div class="user-result-username">{{ $user->username }}</div>
-                        @if($user->name)
-                        <div class="user-result-fullname">{{ $user->name }}</div>
-                        @endif
-                    </div>
-                    <div class="user-result-arrow">
-                        <i class="fas fa-chevron-right"></i>
-                    </div>
-                </a>
+            {{-- DIUBAH: Menggunakan Bootstrap Grid & Gap --}}
+            <div class="grid gap-3">
+                @foreach($userResults as $user)
+                <div class="user-result-card">
+                    {{-- DIUBAH: Menerapkan kelas Bootstrap --}}
+                    <a href="{{ route('profile.show', $user->id) }}" class="d-flex align-items-center p-3 text-decoration-none text-body user-result-link">
+                        <img src="{{ $user->profile_image ? asset('storage/' . $user->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($user->username) . '&background=E8F0FE&color=007BFF&size=56&font-size=0.5&rounded=true' }}" alt="{{ $user->username }}" class="rounded-circle object-fit-cover me-3 user-result-avatar">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold text-dark user-result-username">{{ $user->username }}</div>
+                            @if($user->name)
+                            <div class="text-secondary small user-result-fullname">{{ $user->name }}</div>
+                            @endif
+                        </div>
+                        <div class="user-result-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
             </div>
-            @endforeach
-        </div>
-
-        @if ($userResults->hasPages())
-        <div class="pagination-wrapper">
-            {{ $userResults->appends(['q' => $query])->links('pagination::bootstrap-5') }}
+            @if ($userResults->hasPages())
+            <div class="d-flex justify-content-center mt-5"> {{-- DIUBAH: .pagination-wrapper -> bootstrap classes --}}
+                {{ $userResults->appends(['q' => $query])->links('pagination::bootstrap-5') }}
+            </div>
+            @endif
         </div>
         @endif
-    </div>
-    @endif
 
-    <!-- Post Results -->
-    @if(isset($postResults) && $postResults->count() > 0)
-    <div class="results-section">
-        <div class="section-header">
-            <h4 class="section-title">
-                <i class="fas fa-images me-2"></i>
-                Postingan Ditemukan
+        {{-- Hasil Postingan --}}
+        @if($postResults->isNotEmpty())
+        <div class="results-section">
+            <h4 class="section-title text-primary border-bottom pb-3 mb-3 mt-5 fw-semibold"> {{-- DIUBAH: Menambahkan .fw-semibold --}}
+                <i class="fas fa-images me-3"></i>Postingan Ditemukan
             </h4>
-            <div class="section-divider"></div>
-        </div>
-
-        <div class="posts-grid">
-            @foreach($postResults as $post)
-            <article class="post-result-card">
-                <div class="post-result-header">
-                    @if($post->user)
-                    <a href="{{ route('profile.show', $post->user->id) }}" class="post-user-link">
-                        <img src="{{ $post->user->profile_image ? asset('storage/' . $post->user->profile_image) : 'https://via.placeholder.com/36' }}"
-                            class="post-user-avatar"
-                            alt="{{ $post->user->username }}">
-                        <div class="post-user-info">
-                            <span class="post-username">{{ $post->user->username }}</span>
-                            <span class="post-timestamp">{{ $post->created_at->diffForHumans() }}</span>
+            <div class="posts-grid">
+                @foreach($postResults as $post)
+                <article class="post-result-card">
+                    {{-- DIUBAH: Menggunakan Bootstrap .p-3, .d-flex, .align-items-center --}}
+                    <header class="d-flex align-items-center p-3 post-header">
+                        @if($post->user)
+                        <a href="{{ route('profile.show', $post->user->id) }}" class="text-decoration-none d-flex align-items-center text-body">
+                            <img src="{{ $post->user->profile_image ? asset('storage/' . $post->user->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($post->user->username) . '&background=E8F0FE&color=007BFF&size=40&font-size=0.5&rounded=true' }}" alt="{{ $post->user->username }}" class="rounded-circle object-fit-cover me-3 post-user-avatar">
+                            <div class="post-user-info">
+                                <span class="fw-semibold text-dark post-username">{{ $post->user->username }}</span>
+                                <div class="small text-secondary post-timestamp">{{ $post->created_at->diffForHumans() }}</div>
+                            </div>
+                        </a>
+                        
+                        @if(auth()->id() === $post->user_id)
+                        <div class="dropdown post-actions ms-auto">
+                            <button class="action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('posts.edit', $post->id) }}">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                        Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <form action="{{ route('posts.destroy', $post->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item danger">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                                <polyline points="3,6 5,6 21,6"></polyline><path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"></path>
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </div>
-                    </a>
-                    @else
-                    <div class="post-user-link">
-                        <img src="https://via.placeholder.com/36" class="post-user-avatar" alt="Deleted User">
-                        <div class="post-user-info">
-                            <span class="post-username deleted">Pengguna Dihapus</span>
-                            <span class="post-timestamp">{{ $post->created_at->diffForHumans() }}</span>
+                        @endif
+                        @endif
+                    </header>
+                    
+                    <a href="{{ route('posts.show', $post->id) }}" class="text-decoration-none">
+                        @if($post->image_path)
+                        <div class="post-image">
+                            <img src="{{ asset('storage/' . $post->image_path) }}" alt="Post image" class="w-100 h-100 object-fit-cover"> {{-- DIUBAH: Tambah kelas Bootstrap --}}
                         </div>
-                    </div>
-                    @endif
-                </div>
-
-                @if($post->image_path)
-                <div class="post-result-image">
-                    <a href="{{ route('posts.show', $post->id) }}">
-                        <img src="{{ asset('storage/' . $post->image_path) }}" alt="Post image">
+                        @endif
+                        @if($post->caption)
+                        {{-- DIUBAH: Menggunakan padding Bootstrap --}}
+                        <div class="p-3">
+                            <div class="caption">
+                                <span class="text-secondary small">{{ Str::limit($post->caption, 120) }}</span> {{-- DIUBAH: Menggunakan kelas Bootstrap --}}
+                            </div>
+                        </div>
+                        @endif
                     </a>
-                </div>
-                @endif
-
-                <div class="post-result-content">
-                    <p class="post-caption">{{ Str::limit($post->caption, 120) }}</p>
-                    <a href="{{ route('posts.show', $post->id) }}" class="post-view-btn">
-                        <i class="fas fa-eye me-1"></i>
-                        Lihat Postingan
-                    </a>
-                </div>
-            </article>
-            @endforeach
-        </div>
-
-        @if ($postResults->hasPages())
-        <div class="pagination-wrapper">
-            {{ $postResults->appends(['q' => $query])->links('pagination::bootstrap-5') }}
+                </article>
+                @endforeach
+            </div>
+            @if ($postResults->hasPages())
+            <div class="d-flex justify-content-center mt-5"> {{-- DIUBAH: .pagination-wrapper -> bootstrap classes --}}
+                {{ $postResults->appends(['q' => $query])->links('pagination::bootstrap-5') }}
+            </div>
+            @endif
         </div>
         @endif
-    </div>
-    @endif
-
-    <!-- No Results -->
-    @if(isset($query) && $query && (!isset($userResults) || $userResults->isEmpty()) && (!isset($postResults) || $postResults->isEmpty()))
-    <div class="no-results">
-        <div class="no-results-icon">
-            <i class="fas fa-search"></i>
+        
+        {{-- Tampilan jika tidak ada hasil sama sekali --}}
+        @if($userResults->isEmpty() && $postResults->isEmpty())
+        <div class="text-center p-5 bg-body-tertiary rounded-3 border"> {{-- DIUBAH: Menerapkan kelas Bootstrap --}}
+            <div class="no-results-icon"><i class="fas fa-search"></i></div>
+            <h4 class="fw-semibold fs-5">Tidak Ada Hasil</h4> {{-- DIUBAH: Menerapkan kelas Bootstrap --}}
+            <p class="text-secondary">Kami tidak dapat menemukan apapun untuk "<strong>{{ $query }}</strong>".</p>
         </div>
-        <h4 class="no-results-title">Tidak Ada Hasil</h4>
-        <p class="no-results-text">
-            Kami tidak dapat menemukan apapun untuk "<strong>{{ $query }}</strong>".
-            <br>Coba kata kunci pencarian yang berbeda.
-        </p>
-    </div>
-    @endif
+        @endif
 
-    @elseif(isset($query) && !$query && request()->has('q'))
-    <div class="empty-search">
-        <div class="empty-search-icon">
-            <i class="fas fa-keyboard"></i>
-        </div>
-        <p class="empty-search-text">Silakan masukkan kata kunci untuk mencari postingan atau pengguna.</p>
+    {{-- Pesan jika query kosong --}}
+    @elseif(request()->has('q'))
+    <div class="text-center p-5 bg-body-tertiary rounded-3 border"> {{-- DIUBAH: Menerapkan kelas Bootstrap --}}
+        <div class="empty-search-icon"><i class="far fa-keyboard"></i></div>
+        <p class="text-secondary">Silakan masukkan kata kunci untuk mencari.</p>
     </div>
     @endif
 </div>
 
+{{-- ================================================================== --}}
+{{-- BLOK CSS KUSTOM YANG DIPERSEDIKIT --}}
+{{-- ================================================================== --}}
 <style>
-    /* Search Page Styles */
-    .search-container {
-        max-width: 100%;
-        margin: 0 auto;
-        padding: 1rem;
+    /* Variabel Warna & Properti yang dipertahankan untuk dropdown */
+    :root {
+        --gray-100: #F3F4F6;
+        --gray-200: #E5E7EB;
+        --gray-500: #6B7280;
+        --gray-700: #374151;
+        --gray-900: #111827;
+        --red-600: #DC2626;
+        --shadow-lg: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
     }
 
-    /* Search Header */
-    .search-card {
-        background: var(--card-background);
-        border-radius: var(--border-radius, 12px);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-modern, 0 4px 12px rgba(0, 0, 0, 0.06));
-        overflow: hidden;
-    }
-
-    .search-card-body {
-        padding: 1.5rem;
-    }
-
-    .search-title {
-        color: var(--text-primary);
-        font-weight: 600;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-    }
-
-    .search-title .fas {
-        font-size: 1.05rem;
-        margin-right: 0.4rem;
-    }
-
-    .search-input-wrapper {
-        display: flex;
-        gap: 0;
-        border-radius: var(--border-radius-input, 10px);
-        overflow: hidden;
-        border: 1px solid var(--border-color-input, var(--border-color));
-        transition: all 0.2s ease-in-out;
-    }
-
+    /* Gaya kustom yang dipertahankan karena tidak ada padanan 100% di Bootstrap */
     .search-input-wrapper:focus-within {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 0, 123, 255), 0.15);
+        border-color: var(--bs-primary) !important;
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    }
+
+    .search-btn .btn-text {
+        font-weight: 600;
     }
 
     .search-input {
-        flex: 1;
-        border: none;
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-        background: transparent;
-        outline: none;
-        color: var(--text-primary);
+        font-size: 0.95rem;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
     }
-
-    .search-input::placeholder {
-        color: var(--text-secondary);
-        opacity: 0.8;
-    }
-
-    .search-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.25rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s ease-in-out, transform 0.1s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.9rem;
-    }
-
-    .search-btn .fas {
-        font-size: 0.85rem;
-    }
-
-    .search-btn:hover {
-        background: var(--primary-darker, #0056b3);
-    }
-
-    .search-btn:active {
-        transform: scale(0.98);
-    }
-
-
-    .btn-text {
-        display: inline-block;
-    }
-
-    /* Responsive Design Adjustments for Search Card */
-    @media (max-width: 767px) {
-        .search-container {
-            padding: 0.75rem;
-        }
-        
-        .search-card-body {
-            padding: 1.25rem;
-        }
-        
-        .search-title {
-            font-size: 1.1rem;
-        }
-        
-        .search-title .fas {
-            font-size: 1rem;
-        }
-        
-        .search-input-wrapper {
-            flex-direction: column;
-            border-radius: var(--border-radius-input, 10px);
-        }
-
-        .search-input {
-            text-align: center;
-            padding: 0.8rem 1rem;
-        }
-
-        .search-btn {
-            border-radius: 0;
-            justify-content: center;
-            padding: 0.8rem 1rem;
-            font-size: 0.9rem;
-        }
-
-        .search-btn .fas {
-            font-size: 0.9rem;
-        }
-
-        .btn-text {
-            display: none;
-        }
-    }
-
-    /* Results Sections */
-    .results-section {
-        margin-bottom: 2.5rem;
-    }
-
-    .section-header {
-        margin-bottom: 1.25rem;
-    }
-
+    
     .section-title {
-        color: var(--text-primary);
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 0.4rem;
-    }
-
-    .section-title .fas {
-        font-size: 1rem;
-    }
-
-    .section-divider {
-        height: 2px;
-        background: linear-gradient(90deg, var(--primary-color) 0%, transparent 100%);
-        border-radius: 1px;
-    }
-
-    /* User Results */
-    .users-grid {
-        display: grid;
-        gap: 0.9rem;
-        grid-template-columns: 1fr;
+        font-size: 1.2rem;
     }
 
     .user-result-card {
-        background: var(--card-background);
-        border-radius: var(--border-radius);
-        border: 1px solid var(--border-color);
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 15px;
         transition: all 0.3s ease;
-        overflow: hidden;
+        margin-bottom: 16px
     }
 
     .user-result-card:hover {
-        border-color: var(--primary-color);
-        box-shadow: var(--shadow-medium);
-        transform: translateY(-2px);
-    }
-
-    .user-result-link {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .user-result-avatar {
-        margin-right: 0.9rem;
-        flex-shrink: 0;
-    }
-
-    .user-result-avatar img {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid var(--border-color);
-    }
-
-    .user-result-info {
-        flex: 1;
-    }
-
-    .user-result-username {
-        font-weight: 600;
-        color: var(--text-primary);
-        font-size: 1rem;
-        margin-bottom: 0.2rem;
-    }
-
-    .user-result-fullname {
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-    }
-
-    .user-result-arrow {
-        color: var(--text-secondary);
-        transition: all 0.2s ease;
-    }
-
-    .user-result-arrow .fas {
-        font-size: 0.9rem;
-    }
-
-
-    .user-result-card:hover .user-result-arrow {
-        color: var(--primary-color);
-        transform: translateX(4px);
-    }
-
-    /* Post Results */
-    .posts-grid {
-        display: grid;
-        gap: 1.25rem;
-        grid-template-columns: 1fr;
-    }
-
-    .post-result-card {
-        background: var(--card-background);
-        border-radius: var(--border-radius);
-        border: 1px solid var(--border-color);
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .post-result-card:hover {
-        box-shadow: var(--shadow-medium);
-        transform: translateY(-2px);
-    }
-
-    .post-result-header {
-        padding: 0.9rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .post-user-link {
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .post-user-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-right: 0.65rem;
-        border: 1px solid var(--border-color);
-    }
-
-    .post-user-info {
-        flex: 1;
-    }
-
-    .post-username {
-        font-weight: 600;
-        color: var(--text-primary);
-        display: block;
-        font-size: 0.9rem;
-    }
-
-    .post-username.deleted {
-        color: var(--text-secondary);
-        font-style: italic;
-    }
-
-    .post-timestamp {
-        color: var(--text-secondary);
-        font-size: 0.75rem;
-        display: block;
-        margin-top: 0.1rem;
-    }
-
-    .post-result-image {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .post-result-image img {
-        width: 100%;
-        height: 280px;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.3s ease;
-    }
-
-    .post-result-image:hover img {
-        transform: scale(1.02);
-    }
-
-    .post-result-content {
-        padding: 1rem;
-    }
-
-    .post-caption {
-        color: var(--text-primary);
-        line-height: 1.5;
-        margin-bottom: 0.9rem;
-        font-size: 0.9rem;
-    }
-
-    .post-view-btn {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.4rem 0.8rem;
-        background: var(--primary-color);
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: 500;
-        font-size: 0.85rem;
-        transition: all 0.2s ease;
-    }
-
-    .post-view-btn .fas {
-        font-size: 0.8rem;
-        margin-right: 0.3rem;
-    }
-
-
-    .post-view-btn:hover {
-        background: #0056b3;
-        color: white;
+        border-color: var(--bs-primary);
+        box-shadow: var(--shadow-lg);
         transform: translateY(-1px);
     }
 
-    /* No Results & Empty State */
-    .no-results,
-    .empty-search {
-        text-align: center;
-        padding: 3rem 1.5rem;
-        background: var(--card-background);
-        border-radius: var(--border-radius);
-        border: 1px solid var(--border-color);
+    .user-result-avatar {
+        width: 56px;
+        height: 56px;
     }
 
-    .no-results-icon,
-    .empty-search-icon {
-        font-size: 2.8rem;
-        color: var(--text-secondary);
+    .user-result-arrow {
+        color: var(--bs-secondary-color);
+        transition: all 0.2s ease;
+    }
+    
+    .user-result-card:hover .user-result-arrow {
+        color: var(--bs-primary);
+    }
+    
+    .posts-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .post-result-card {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .post-result-card:hover {
+        border-color: var(--bs-primary);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-1px);
+    }
+    
+    .post-header {
+        padding: 12px 16px; /* Padding spesifik dipertahankan */
+    }
+    .post-user-avatar { width: 40px; height: 40px; }
+    
+    /* GAYA DROPDOWN KUSTOM DIpertahankan karena desainnya unik */
+    .post-actions { position: relative; }
+    .action-btn { background: none; border: none; color: var(--gray-500); cursor: pointer; padding: 8px; border-radius: var(--radius-md); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+    .action-btn:hover { background: var(--gray-100); color: var(--gray-700); }
+    .dropdown-menu { border: 1px solid var(--gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 8px; min-width: 160px; }
+    .dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-md); font-size: 14px; color: var(--gray-700); text-decoration: none; border: none; background: none; width: 100%; cursor: pointer; transition: all 0.2s ease; }
+    .dropdown-item:hover { background: var(--gray-100); color: var(--gray-900); }
+    .dropdown-item.danger { color: var(--red-600); }
+    .dropdown-item.danger:hover { background: rgba(220, 38, 38, 0.1); color: var(--red-600); }
+    
+    .post-image { aspect-ratio: 1/1; }
+
+    /* Gaya untuk 'No Results' & 'Empty Search' dipertahankan untuk ikon */
+    .no-results-icon, .empty-search-icon {
+        font-size: 2rem;
+        color: var(--bs-secondary-color);
         margin-bottom: 1.25rem;
-        opacity: 0.7;
     }
-
-    .no-results-icon .fas,
-    .empty-search-icon .fas {
-        font-size: inherit;
-    }
-
-    .no-results-title {
-        color: var(--text-primary);
-        font-weight: 600;
-        margin-bottom: 0.9rem;
-        font-size: 1.3rem;
-    }
-
-    .no-results-text,
-    .empty-search-text {
-        color: var(--text-secondary);
-        line-height: 1.5;
-        font-size: 0.95rem;
-    }
-
-    /* Pagination */
-    .pagination-wrapper {
-        display: flex;
-        justify-content: center;
-        margin-top: 1.75rem;
-    }
-
-    /* Responsive Design */
-    @media (min-width: 768px) {
-        .users-grid {
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-        }
-
-        .posts-grid {
-            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-        }
-
-        .btn-text {
-            display: inline-block;
-        }
-    }
-
-    @media (max-width: 767px) {
-        .user-result-avatar img {
-            width: 48px;
-            height: 48px;
-        }
-
-        .user-result-username {
-            font-size: 0.95rem;
-        }
-
-        .user-result-fullname {
-            font-size: 0.8rem;
-        }
-
-        .post-result-image img {
-            height: 220px;
-        }
-
-        .post-caption {
-            font-size: 0.85rem;
-        }
-
-        .post-view-btn {
-            font-size: 0.8rem;
-        }
-
-        .no-results,
-        .empty-search {
-            padding: 2.5rem 1rem;
-        }
-
-        .no-results-icon,
-        .empty-search-icon {
-            font-size: 2.5rem;
-        }
-
-        .no-results-title {
-            font-size: 1.1rem;
-        }
-
-        .no-results-text,
-        .empty-search-text {
-            font-size: 0.9rem;
-        }
+    
+    /* Responsive */
+    @media (max-width: 576px) {
+        .search-btn .btn-text { display: none; }
+        .search-btn { padding: 0.75rem 1rem; }
     }
 </style>
 @endsection
