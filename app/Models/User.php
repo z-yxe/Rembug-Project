@@ -5,7 +5,7 @@ namespace App\Models;
 use MongoDB\Laravel\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany; // <-- TAMBAHKAN INI
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -35,7 +35,7 @@ class User extends Authenticatable
 
     public function posts(): HasMany
     {
-        return $this->hasMany(Post::class);
+        return $this->hasMany(Post::class)->latest();
     }
 
     public function likes(): HasMany
