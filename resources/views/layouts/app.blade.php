@@ -502,7 +502,7 @@
                     <div class="sidebar-section">
                         <h6 class="sidebar-title">Discover People</h6>
                         @if(isset($randomUsersForSidebar) && $randomUsersForSidebar->count() > 0)
-                        @foreach($randomUsersForSidebar as $user)
+                        @foreach($randomUsersForSidebar->take(5) as $user)
                         {{-- Item Pengguna --}}
                         <div class="user-item">
                             <a href="{{ route('profile.show', $user->id) }}"><img src="{{ $user->profile_image ? asset('storage/' . $user->profile_image) : 'https://via.placeholder.com/40' }}" class="user-avatar" style="width: 40px; height: 40px;" alt="{{ $user->username }}"></a>

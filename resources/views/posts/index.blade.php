@@ -190,13 +190,6 @@
     @endforelse
 </div>
 
-{{-- Pagination Links --}}
-@if($posts->hasPages())
-<div class="pagination-wrapper">
-    {{ $posts->links() }}
-</div>
-@endif
-
 <style>
     /* Color & Style Variables */
     :root {
@@ -518,13 +511,6 @@
         background: #0056b3;
         transform: translateY(-2px);
         color: white;
-    }
-
-    /* Pagination */
-    .pagination-wrapper {
-        display: flex;
-        justify-content: center;
-        margin: 32px 0;
     }
 
     /* Dropdown Menu */
